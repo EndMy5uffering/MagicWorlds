@@ -13,6 +13,8 @@
 #include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
 
+#include "Mesh.h"
+
 int SCREEN_WIDTH = 900;
 int SCREEN_HEIGHT = 900;
 
@@ -108,17 +110,11 @@ int main(void)
     vxbuffer.push_back({ { -1, -1, 0, 1 }, { 0, 1 } });
     vxbuffer.push_back({ { 1, -1, 0, 1 }, { 1, 1 } });
     std::vector<unsigned int> idxbuff{ 0, 1, 2, 2, 3, 0 };
-    VertexArray va{};
-    //va.Bind();
-    VertexBuffer vb{ vxbuffer.data(), 4 * sizeof(Vertex)};
     VertexBufferLayout vbl;
     vbl.Push<glm::vec4>();
     vbl.Push<glm::vec2>();
-    IndexBuffer ib{ idxbuff };
-    va.AddBuffer(vb, vbl);
-    va.Unbind();
-    vb.Unbind();
-    ib.Unbind();
+
+    Mesh<Vertex> mesh{vxbuffer, idxbuff, vbl};
 
     Camera cam{900,900};
     cam.SetFar(1000);
@@ -145,9 +141,10 @@ int main(void)
         texShader.SetUniform1i("u_tex0", 0);
         texShader.SetUniform1i("u_tex1", 1);
         texShader.SetUniformMat4f("u_viewproj", cam.GetViewProjMatrix() * glm::transpose(model));
-        //g_renderer.Draw(va, ib);
-        va.Bind();
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
+        mesh.Bind();
+        //GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+        mesh.Draw(g_renderer);
 
         g_renderer.DrawAxis(cam);
         /* Swap front and back buffers */

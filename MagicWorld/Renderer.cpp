@@ -17,6 +17,13 @@ void Renderer::Draw(VertexArray& va, IndexBuffer& ib) const
     GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
+void Renderer::Draw(const VertexArray& va, int idx_count) const
+{
+    va.Bind();
+
+    GLCall(glDrawElements(GL_TRIANGLES, idx_count, GL_UNSIGNED_INT, nullptr));
+}
+
 void Renderer::DrawLine(const glm::vec3 v0, const glm::vec3 v1, const glm::vec4 color, Camera& cam, float thickness)
 {
     m_Line3D.Bind();

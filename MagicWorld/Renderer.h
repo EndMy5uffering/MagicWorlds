@@ -30,6 +30,7 @@ public:
 
     void Clear() const;
     void Draw(VertexArray& va, IndexBuffer& ib) const;
+    void Draw(const VertexArray& va, int idx_count) const;
     void DrawLine(glm::vec3 v0, glm::vec3 v1, glm::vec4 color, Camera& cam, float thickness);
     void DrawLine(glm::vec3 v0, glm::vec3 v1, glm::vec4 color, Camera& cam);
     void DrawLine(glm::vec2 v0, glm::vec2 v1, glm::vec4 color);
