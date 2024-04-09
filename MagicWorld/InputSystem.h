@@ -8,7 +8,10 @@
 
 
 // Perhaps to be able to set callbacks for individual keys in the future
-//typedef void (*InputSystemKeyCallback)();
+typedef void (*InputSystemKeyCallback)();
+typedef void (*InputSystemMouseMoveCallback)(double mouse_x, double mouse_y);
+typedef void (*InputSystemMouseScrollCallback)(double scroll);
+typedef void (*InputSystemMouseButtonCallback)(int button, int action);
 
 class InputSystem
 {
@@ -22,6 +25,9 @@ private:
 
 	// For key callbacks in the future
 	//std::array<std::vector<InputSystemKeyCallback>, m_num_keys> m_key_callbacks{};
+	std::vector<InputSystemMouseMoveCallback> m_mouse_move_callbacks{};
+	std::vector<InputSystemMouseScrollCallback> m_mouse_scroll_callbacks{};
+	std::vector<InputSystemMouseButtonCallback> m_mouse_button_callbacks{};
 
 	static const unsigned int m_num_mouse_buttons = 10;
 	std::array<bool, m_num_mouse_buttons> m_mouse_buttons{};
@@ -49,6 +55,10 @@ private:
 		if (is == nullptr) return;
 
 		is->m_scroll = yoffset;
+		for (InputSystemMouseScrollCallback ismsc : is->m_mouse_scroll_callbacks)
+		{
+			ismsc(yoffset);
+		}
 	}
 
 	static void MouseMoveCallback(GLFWwindow* window, double xpos, double ypos)
@@ -59,17 +69,32 @@ private:
 
 		is->m_mouse_x = xpos;
 		is->m_mouse_y = ypos;
+
+		for (InputSystemMouseMoveCallback ismmc : is->m_mouse_move_callbacks)
+		{
+			ismmc(xpos, ypos);
+		}
+	}
+
+	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+	{
+		InputSystem* is = InputSystem::m_win_inputs[window];
+
+		if (is == nullptr) return;
+
+		is->UpdateButtonInputs(button, action, mods);
+
+		for (InputSystemMouseButtonCallback ismbc : is->m_mouse_button_callbacks)
+		{
+			ismbc(button, action);
+		}
+
 	}
 
 public:
 
 	InputSystem(GLFWwindow* window);
 	~InputSystem();
-
-	/**
-	* Called by the engine to update the state of the input system.
-	*/
-	void Update();
 
 	/**
 	* Returns true if a key is pressed.
@@ -135,5 +160,10 @@ public:
 	*
 	*/
 	void UpdateKeyInputs(int key, int scancode, int action, int mods);
+
+	/**
+	*
+	*/
+	void UpdateButtonInputs(int button, int action, int mods);
 
 };

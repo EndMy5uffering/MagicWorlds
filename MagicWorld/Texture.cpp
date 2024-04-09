@@ -154,7 +154,7 @@ Color Texture::GetPixel(unsigned int x, unsigned int y)
     }
     default:
         std::cout << "Color mode not supported!\n";
-        break;
+        return { 0, 0, 0, 0 };
     }
 }
 

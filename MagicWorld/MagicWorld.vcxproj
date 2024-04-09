@@ -152,6 +152,8 @@
     <ClCompile Include="ShareStorageBuffer.cpp" />
     <ClCompile Include="STB_Image.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="UILib.cpp" />
     <ClCompile Include="VertexArray.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
   </ItemGroup>
@@ -168,6 +170,7 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShareStorageBuffer.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="Transform.h" />
     <ClInclude Include="UILib.h" />
     <ClInclude Include="VertexArray.h" />
     <ClInclude Include="VertexBuffer.h" />

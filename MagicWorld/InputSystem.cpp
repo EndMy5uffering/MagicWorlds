@@ -6,9 +6,10 @@ InputSystem::InputSystem(GLFWwindow* window) : m_window{ window }
 {
 	
 	m_win_inputs[window] = this;
-	glfwSetKeyCallback(window, InputSystem::KeyCallback);
+	glfwSetKeyCallback(m_window, InputSystem::KeyCallback);
 	glfwSetScrollCallback(m_window, InputSystem::ScrollCallback);
 	glfwSetCursorPosCallback(m_window, InputSystem::MouseMoveCallback);
+	glfwSetMouseButtonCallback(m_window, InputSystem::MouseButtonCallback);
 
 }
 
@@ -20,18 +21,16 @@ InputSystem::~InputSystem()
 	glfwSetCursorPosCallback(m_window, nullptr);
 }
 
-void InputSystem::Update()
+/*void InputSystem::Update()
 {
 	m_scroll = 0.0;
-	for (unsigned long i = 0; i < m_num_keys; i++) {
-		m_keys_last[i] = m_keys[i];
-	}
 
 	for (unsigned long i = 0; i < m_num_mouse_buttons; i++) {
 		m_mouse_buttons_last[i] = m_mouse_buttons[i];
 	}
 
-}
+
+}*/
 
 bool InputSystem::IsKey(int key_code)
 {
@@ -91,6 +90,10 @@ double InputSystem::GetScroll()
 
 void InputSystem::UpdateKeyInputs(int key, int scancode, int action, int mods)
 {
+	for (unsigned long i = 0; i < m_num_keys; i++) {
+		m_keys_last[i] = m_keys[i];
+	}
+
 	switch (action)
 	{
 	case GLFW_PRESS: 
@@ -109,6 +112,31 @@ void InputSystem::UpdateKeyInputs(int key, int scancode, int action, int mods)
 		m_keys[key] = false;
 	} break;
 
+	default:
+		break;
+	}
+
+
+}
+
+void InputSystem::UpdateButtonInputs(int button, int action, int mods)
+{
+	for (unsigned long i = 0; i < m_num_mouse_buttons; i++) {
+		m_mouse_buttons_last[i] = m_mouse_buttons[i];
+	}
+
+	switch (action)
+	{
+	case GLFW_PRESS:
+	{
+		if (button > m_num_mouse_buttons || button < 0) break;
+		m_mouse_buttons[button] = true;
+	} break;
+	case GLFW_RELEASE:
+	{
+		if (button > m_num_mouse_buttons || button < 0) break;
+		m_mouse_buttons[button] = false;
+	} break;
 	default:
 		break;
 	}
