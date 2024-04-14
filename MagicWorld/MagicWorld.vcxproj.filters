@@ -22,6 +22,9 @@
     <Filter Include="Scenes\Scenes_cpp">
       <UniqueIdentifier>{8c1b81b3-8a0b-4cd9-96c2-ed3e5d969ad7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Noise">
+      <UniqueIdentifier>{d9733fc9-2cf4-437f-b9fc-807937217921}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -127,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="Transform.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PerlinNoise.hpp">
+      <Filter>Noise</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
