@@ -17,6 +17,7 @@ public:
 
 	void Bind() const;
 	void Unbind() const;
+	void Delete();
 	void SubData(unsigned int offset,const void* data, unsigned int size);
 	void SubData(const void* data, unsigned int size);
 

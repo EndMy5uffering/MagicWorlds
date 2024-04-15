@@ -20,19 +20,19 @@ Camera::Camera(int width, int height, glm::vec3 startPos) :
 {
 }
 
-Camera::Camera(int width, int height, glm::vec3 startPos, glm::vec3 orientation) :
+Camera::Camera(int width, int height, glm::vec3 startPos, glm::vec3 forward) :
 	mWidth{ width },
 	mHeight{ height },
-	forward(orientation),
+	forward(forward),
 	position(startPos),
 	up(glm::vec3(0.0f, 1.0f, 0.0f))
 {
 }
 
-Camera::Camera(int width, int height, glm::vec3 startPos, glm::vec3 orientation, glm::vec3 up) :
+Camera::Camera(int width, int height, glm::vec3 startPos, glm::vec3 forward, glm::vec3 up) :
 	mWidth{ width },
 	mHeight{ height },
-	forward(orientation), 
+	forward(forward),
 	position(startPos), up(up)
 {
 }
@@ -165,10 +165,25 @@ void Camera::HandleInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		mCaptureMouse = false;
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 	if (mCaptureMouse) 
 	{
 		HandleCamRotation(window);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && !(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS))
+	{
+		std::cout << "POS: { 'x': " << position.x << ", 'y': " << position.y << ", 'z': " << position.z << "}\n";
+		std::cout << "FOR: { 'x': " << forward.x << ", 'y': " << forward.y << ", 'z': " << forward.z << "}\n";
+		std::cout << "UP : { 'x': " << up.x << ", 'y': " << up.y << ", 'z': " << up.z << "}\n";
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+	{
+		std::cout << "{ " << position.x << ", " << position.y << ", " << position.z << "},\n";
+		std::cout << "{ " << forward.x << ", " << forward.y << ", " << forward.z << "},\n";
+		std::cout << "{ " << up.x << ", " << up.y << ", " << up.z << "}\n";
 	}
 }
 

@@ -29,7 +29,6 @@ IndexBuffer::IndexBuffer(const IndexBuffer& other)
 
 IndexBuffer::~IndexBuffer()
 {
-    GLCall(glDeleteBuffers(1, &m_RendererID));
 }
 
 void IndexBuffer::Bind() const
@@ -40,6 +39,11 @@ void IndexBuffer::Bind() const
 void IndexBuffer::Unbind() const
 {
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+}
+
+void IndexBuffer::Delete()
+{
+    GLCall(glDeleteBuffers(1, &m_RendererID));
 }
 
 IndexBuffer& IndexBuffer::operator=(const IndexBuffer& other)

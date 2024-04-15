@@ -35,8 +35,8 @@ public:
 
 	Camera(int width, int height);
 	Camera(int width, int height, glm::vec3 startPos);
-	Camera(int width, int height, glm::vec3 startPos, glm::vec3 orientation);
-	Camera(int width, int height, glm::vec3 startPos, glm::vec3 orientation, glm::vec3 up);
+	Camera(int width, int height, glm::vec3 startPos, glm::vec3 forward);
+	Camera(int width, int height, glm::vec3 startPos, glm::vec3 forward, glm::vec3 up);
 	~Camera();
 
 	glm::mat4 GetViewProjMatrix();

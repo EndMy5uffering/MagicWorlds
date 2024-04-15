@@ -14,6 +14,7 @@ public:
 
 	void Bind() const;
 	void Unbind() const;
+	void Delete();
 
 	inline size_t GetCount() const { return m_data.size(); }
 	IndexBuffer& operator=(const IndexBuffer& other); //Copy Assignment

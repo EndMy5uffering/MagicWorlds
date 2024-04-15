@@ -140,12 +140,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Chunk.cpp" />
+    <ClCompile Include="ChunkGenerator.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="DefaultScene.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="InputSystem.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MagicWorldMain.cpp" />
+    <ClCompile Include="Map.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -159,13 +162,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Chunk.h" />
+    <ClInclude Include="ChunkGenerator.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="DefaultScene.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="InputSystem.h" />
     <ClInclude Include="Logger.h" />
+    <ClInclude Include="Map.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="PerlinNoise.hpp" />
+    <ClInclude Include="Noise.hpp" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />

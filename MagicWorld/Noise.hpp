@@ -15,7 +15,7 @@ namespace Noise
         // https ://github.com/nothings/stb/blob/master/stb_perlin.h
         // https ://github.com/stegu/perlin-noise/blob/master/src/noise1234.c
 
-        //Permutation Table
+        //Permutation Table for pseudo random number generation
         unsigned char p[512] = {
             151, 160, 137, 91, 90, 15,
                 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23,
@@ -46,16 +46,14 @@ namespace Noise
         };
 
         unsigned int m_seed = 0;
+        double m_lacunarity = 2.0;
+        double m_persistence = 1.0;
+        double m_frequency = 1.0;
+        int m_octaves = 3.0;
 
-        double fade(double t)
-        {
-            return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
-        }
+        double fade(double t) { return t * t * t * (t * (t * 6.0 - 15.0) + 10.0); }
 
-        double lerp(double a, double b, double t)
-        {
-            return a + ((b - a) * t);
-        }
+        double lerp(double a, double b, double t) { return a + ((b - a) * t); }
 
         double grad(int hash, double x, double y)
         {
@@ -101,18 +99,16 @@ namespace Noise
             Perlin() 
             {
                 std::srand(std::time(nullptr));
-                m_seed = std::rand();
+                SetSeed(std::rand());
             }
 
-            Perlin(unsigned int seed)
-            {
-                m_seed = seed;
-                std::srand(m_seed);
-                for (int i = 0; i < 512; ++i)
-                {
-                    p[i] = std::rand() % 256;
-                }
-            }
+            Perlin(unsigned int seed) { SetSeed(seed); }
+            Perlin(unsigned int seed, double frequency, double persistence, double lacunarity) 
+                :
+                m_persistence{ persistence },
+                m_frequency{ frequency },
+                m_lacunarity{ lacunarity }
+            { SetSeed(seed); }
 
             double at(double x, double y, double z)
             {
@@ -173,7 +169,59 @@ namespace Noise
                 return lerp(x1, x2, v);
             }
 
+            double at3D_octives(double x, double y, double z) 
+            {
+                double total = 0.0;
+                double frequency = m_frequency;
+                double amplitude = 1.0;
+                double maxValue = 0.0;
+                for (int i = 0; i < m_octaves; ++i) 
+                {
+                    total += at(x * frequency, y * frequency, z * frequency) * amplitude;
+
+                    maxValue += amplitude;
+                    amplitude *= m_persistence;
+                    frequency *= m_lacunarity;
+                }
+                return total / maxValue;
+            }
+
+            double at2D_octives(double x, double y)
+            {
+                double total = 0.0;
+                double frequency = m_frequency;
+                double amplitude = 1.0;
+                double maxValue = 0.0;
+                for (int i = 0; i < m_octaves; ++i)
+                {
+                    total += at(x * frequency, y * frequency) * amplitude;
+
+                    maxValue += amplitude;
+                    amplitude *= m_persistence;
+                    frequency *= m_lacunarity;
+                }
+                return total / maxValue;
+            }
+
             unsigned int GetSeed() { return m_seed; }
+
+            void SetSeed(unsigned int seed) 
+            {
+                m_seed = seed;
+                std::srand(m_seed);
+                for (int i = 0; i < 512; ++i)
+                {
+                    p[i] = std::rand() % 256;
+                }
+            }
+
+            void SetPersistence(double persistence) { this->m_persistence = persistence; }
+
+            void SetLacunarity(double lacunarity) { this->m_lacunarity = lacunarity; }
+
+            void SetFrequency(double frequency) { this->m_frequency = frequency; }
+
+            void SetOctaves(double octaves) { this->m_octaves = octaves; }
 	};
 
 }

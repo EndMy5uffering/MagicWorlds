@@ -14,9 +14,17 @@
 #include "IndexBuffer.h"
 
 #include "Mesh.h"
+#include "Noise.hpp"
+
+#define IDX(x,y,w) ((y*w) + x)
+
 
 int SCREEN_WIDTH = 900;
 int SCREEN_HEIGHT = 900;
+
+Camera cam{ 900,900, { 104.148, -201.413, 137.056},
+{ 0.0553711, 0.913142, -0.403852},
+{ -0.025391, 0.405631, 0.913684} };
 
 
 struct Vertex 
@@ -25,11 +33,21 @@ struct Vertex
     glm::vec2 uv;
 };
 
+struct Vertex_Map
+{
+    glm::vec4 pos;
+    //glm::vec4 normal;
+    glm::vec4 color;
+};
+
 void updateScreenSize(GLFWwindow* window, int width, int height)
 {
     SCREEN_WIDTH = width;
     SCREEN_HEIGHT = height;
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    cam.SetWidth(width);
+    cam.SetHeight(height);
 }
 
 int main(void)
@@ -47,7 +65,7 @@ int main(void)
     //glfwWindowHint(GLFW_SAMPLES, 16);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Magic Worlds", NULL, NULL);
+    window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sim", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -104,6 +122,11 @@ int main(void)
     texShader.AddShaderSource("../Shader/TextureShader/TextrueVert.glsl", GL_VERTEX_SHADER);
     texShader.BuildShader();
 
+    Shader mapShader{};
+    mapShader.AddShaderSource("../Shader/MeshShader/MeshShaderFrag.glsl", GL_FRAGMENT_SHADER);
+    mapShader.AddShaderSource("../Shader/MeshShader/MeshShaderVert.glsl", GL_VERTEX_SHADER);
+    mapShader.BuildShader();
+
     std::vector<Vertex> vxbuffer;
     vxbuffer.push_back({ { 1, 1, 0, 1 }, { 1, 0 } });
     vxbuffer.push_back({ { -1, 1, 0, 1 }, { 0, 0 } });
@@ -116,7 +139,47 @@ int main(void)
 
     Mesh<Vertex> mesh{vxbuffer, idxbuff, vbl};
 
-    Camera cam{900,900};
+
+    int width = 128;
+    int height = 128;
+    std::vector<Vertex_Map> vxbuffer_map;
+    Noise::Perlin perlin = Noise::Perlin(666, 0.05, 0.4, 2.3);
+    for (int i = 0; i < width * height; ++i)
+    {
+        int x = i % width;
+        int y = i / width;
+
+        double noise = perlin.at2D_octives(double(x), double(y));
+        double noise_clam = noise * 0.5 + 0.5;
+        //std::cout << "X: " << x << " Y: " << y << " h: " << noise_clam << " h2: " << noise << "\n";
+        Color c = Color::lerp(
+            { 120, 0, 0, 255 },
+            { 0, 255, 0, 255 },
+            noise_clam);
+        vxbuffer_map.push_back({ {double(x) * 2.0, double(y) * 2.0, noise * 20.0, 1.0}, {c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, 1.0} });
+    }
+
+    std::vector<unsigned int> idxbuff_map;
+    for (int y = 0; y < height-1; ++y)
+    {
+        for (int x = 0; x < width-1; ++x)
+        {
+            idxbuff_map.push_back(IDX(x,y,width));
+            idxbuff_map.push_back(IDX(x, y, width) + width);
+            idxbuff_map.push_back(IDX(x, y, width) + 1);
+            idxbuff_map.push_back(IDX(x, y, width) + width + 1);
+            idxbuff_map.push_back(IDX(x, y, width) + 1);
+            idxbuff_map.push_back(IDX(x, y, width) + width);
+        }
+    }
+
+    VertexBufferLayout vbl_map;
+    vbl_map.Push<glm::vec4>();
+    vbl_map.Push<glm::vec4>();
+
+    Mesh<Vertex_Map> mesh_map{vxbuffer_map, idxbuff_map, vbl_map};
+    
+
     cam.SetFar(1000);
     cam.SetNear(0.001);
     cam.SetFOV(60);
@@ -144,7 +207,14 @@ int main(void)
 
         mesh.Bind();
         //GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
-        mesh.Draw(g_renderer);
+        //mesh.Draw(g_renderer);
+
+        glEnable(GL_DEPTH_TEST);
+        mapShader.Bind();
+        mapShader.SetUniformMat4f("u_view", cam.GetViewMatrix());
+        mapShader.SetUniformMat4f("u_proj", cam.GetProjMatrix());
+        mesh_map.Bind();
+        mesh_map.Draw(g_renderer);
 
         g_renderer.DrawAxis(cam);
         /* Swap front and back buffers */

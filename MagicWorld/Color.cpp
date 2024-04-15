@@ -45,3 +45,30 @@ Color Color::rgba(unsigned char r, unsigned char g, unsigned char b, unsigned ch
 {
     return { r, g, b, a };
 }
+
+Color Color::lerp(const Color a, const Color b, float t)
+{
+    float _r = float(a.r) + (float(b.r - a.r) * t);
+    float _g = float(a.g) + (float(b.g - a.g) * t);
+    float _b = float(a.b) + (float(b.b - a.b) * t);
+    float _a = float(a.a) + (float(b.a - a.a) * t);
+
+    return 
+    { 
+        static_cast<unsigned char>(_r), 
+        static_cast<unsigned char>(_g), 
+        static_cast<unsigned char>(_b), 
+        static_cast<unsigned char>(_a) 
+    };
+}
+
+Color Color::lerp(const std::vector<Color> colors, float t)
+{
+    float f = float(colors.size()) * t;
+    int c0idx = int((colors.size()-1) * t);
+    int c1idx = int(ceil((colors.size()-1) * t));
+    float fc = f - float(c0idx);
+    Color c0 = colors.at(c0idx);
+    Color c1 = colors.at(c1idx);
+    return lerp(c0, c1, f - float(c0idx));
+}
