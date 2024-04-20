@@ -86,6 +86,11 @@ void VertexBuffer::SubData(const void* data, unsigned int size)
     }
 }
 
+unsigned int VertexBuffer::GetVertexBufferObjectID()
+{
+    return m_RendererID;
+}
+
 bool VertexBuffer::isDynamic()
 {
     return mIsDynamic;

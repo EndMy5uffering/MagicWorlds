@@ -15,6 +15,7 @@
 
 #include "Mesh.h"
 #include "Noise.hpp"
+#include "UILib.h"
 
 #define IDX(x,y,w) ((y*w) + x)
 
@@ -127,6 +128,18 @@ int main(void)
     mapShader.AddShaderSource("../Shader/MeshShader/MeshShaderVert.glsl", GL_VERTEX_SHADER);
     mapShader.BuildShader();
 
+    Shader uiShader{};
+    uiShader.AddShaderSource("../Shader/UIShader/UIFrag.glsl", GL_FRAGMENT_SHADER);
+    uiShader.AddShaderSource("../Shader/UIShader/UIVert.glsl", GL_VERTEX_SHADER);
+    uiShader.BuildShader();
+
+    UILib::UIManager manager{uiShader, g_renderer, cam};
+    UILib::GUIElement el0{};
+    el0.SetColor({0, 0, 0, 1});
+    el0.GetTransform().SetPosition({-10, 0, 0});
+    el0.GetTransform().SetScale({0.5, 0.5, 0});
+    manager.AddElement(el0);
+
     std::vector<Vertex> vxbuffer;
     vxbuffer.push_back({ { 1, 1, 0, 1 }, { 1, 0 } });
     vxbuffer.push_back({ { -1, 1, 0, 1 }, { 0, 0 } });
@@ -140,10 +153,12 @@ int main(void)
     Mesh<Vertex> mesh{vxbuffer, idxbuff, vbl};
 
 
-    int width = 128;
-    int height = 128;
+    int width = 64;
+    int height = 64;
+    float mulHight = 100.0;
     std::vector<Vertex_Map> vxbuffer_map;
-    Noise::Perlin perlin = Noise::Perlin(666, 0.05, 0.4, 2.3);
+    Noise::Perlin perlin = Noise::Perlin(666, 0.01, 0.5, 2.0);
+    perlin.SetOctaves(5);
     for (int i = 0; i < width * height; ++i)
     {
         int x = i % width;
@@ -156,7 +171,7 @@ int main(void)
             { 120, 0, 0, 255 },
             { 0, 255, 0, 255 },
             noise_clam);
-        vxbuffer_map.push_back({ {double(x) * 2.0, double(y) * 2.0, noise * 20.0, 1.0}, {c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, 1.0} });
+        vxbuffer_map.push_back({ {double(x) * 2.0, double(y) * 2.0, noise * mulHight, 1.0}, {c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, 1.0} });
     }
 
     std::vector<unsigned int> idxbuff_map;
@@ -217,6 +232,11 @@ int main(void)
         mesh_map.Draw(g_renderer);
 
         g_renderer.DrawAxis(cam);
+
+
+        manager.RenderUIElements();
+
+
         /* Swap front and back buffers */
         GLCall(glfwSwapBuffers(window));
 

@@ -9,7 +9,7 @@ VertexArray::VertexArray()
 
 VertexArray::~VertexArray()
 {
-	GLCall(glDeleteVertexArrays(1, &m_RendererID));
+	
 }
 
 VertexArray::VertexArray(VertexArray&& other) noexcept
@@ -64,4 +64,14 @@ void VertexArray::Bind() const
 void VertexArray::Unbind() const
 {
 	GLCall(glBindVertexArray(0));
+}
+
+void VertexArray::Delete()
+{
+	GLCall(glDeleteVertexArrays(1, &m_RendererID));
+}
+
+unsigned int VertexArray::GetVertexArrayObjectID()
+{
+	return m_RendererID;
 }

@@ -46,6 +46,11 @@ void IndexBuffer::Delete()
     GLCall(glDeleteBuffers(1, &m_RendererID));
 }
 
+unsigned int IndexBuffer::GetIndexBufferObjectID()
+{
+    return m_RendererID;
+}
+
 IndexBuffer& IndexBuffer::operator=(const IndexBuffer& other)
 {
     m_RendererID = other.m_RendererID;

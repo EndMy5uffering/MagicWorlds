@@ -1,7 +1,9 @@
 #pragma once
 
 #include<vector>
+#include<map>
 #include<unordered_map>
+#include<tuple>
 
 #include<glm/glm.hpp>
 
@@ -12,6 +14,7 @@ class Map
 {
 private:
 	std::vector<Chunk> m_chunks;
+	std::unordered_map<ChunkPos, Chunk> m_pos_chunk;
 
 	const int m_seed;
 

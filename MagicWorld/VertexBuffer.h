@@ -21,6 +21,8 @@ public:
 	void SubData(unsigned int offset,const void* data, unsigned int size);
 	void SubData(const void* data, unsigned int size);
 
+	unsigned int GetVertexBufferObjectID();
+
 	bool isDynamic();
 
 private:

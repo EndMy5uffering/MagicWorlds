@@ -1,8 +1,8 @@
 #include "Transform.h"
 
-void Transform::SetPosition(const glm::vec4& pos)
+void Transform::SetPosition(const glm::vec3& pos)
 {
-	m_position = pos;
+	m_position = glm::vec4{ pos, 1.0 };
 }
 
 glm::vec4 Transform::GetPosition()

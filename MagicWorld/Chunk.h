@@ -13,10 +13,25 @@ struct MVert
 
 };
 
+struct ChunkPos 
+{
+	int x;
+	int y;
+};
+
+namespace std {
+	template <>
+	struct hash<ChunkPos> {
+		size_t operator()(const ChunkPos& pos) const {
+			return hash<int>()(pos.x) ^ hash<int>()(pos.y);
+		}
+	};
+}
+
 struct ChunkData 
 {
 	const Mesh<MVert> mesh;
-	const glm::vec2 pos;
+	const ChunkPos pos;
 
 };
 

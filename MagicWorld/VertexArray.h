@@ -19,6 +19,9 @@ public:
 
 	void Bind() const;
 	void Unbind() const;
+	void Delete();
+
+	unsigned int GetVertexArrayObjectID();
 
 private:
 	unsigned int m_RendererID;

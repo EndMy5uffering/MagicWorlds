@@ -15,7 +15,7 @@ private:
 
 public:
 
-	void SetPosition(const glm::vec4& pos);
+	void SetPosition(const glm::vec3& pos);
 	glm::vec4 GetPosition();
 	void Move(const glm::vec3& dist);
 	

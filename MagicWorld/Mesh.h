@@ -19,17 +19,21 @@ private:
 	VertexArray m_vao{};
 	VertexBufferLayout m_vaol{};
 
+	unsigned int m_vbo_id;
+	unsigned int m_ibo_id;
+
 	bool m_packed = false;
 
 public:
 
 	Mesh();
-	Mesh(std::vector<T>& verts, std::vector<unsigned int>& idx_buffer, VertexBufferLayout& vbol);
+	Mesh(const std::vector<T>& verts, const std::vector<unsigned int>& idx_buffer, const VertexBufferLayout& vbol);
 
 	~Mesh();
 
 	void Bind();
 	void Unbind();
+	void Delete();
 
 	void Pack();
 
@@ -48,7 +52,7 @@ inline Mesh<T>::Mesh()
 }
 
 template<typename T>
-inline Mesh<T>::Mesh(std::vector<T>& verts, std::vector<unsigned int>& idx_buffer, VertexBufferLayout& vaol)
+inline Mesh<T>::Mesh(const std::vector<T>& verts, const std::vector<unsigned int>& idx_buffer, const VertexBufferLayout& vaol)
 	:
 	m_vaol{ vaol },
 	m_IdxBuffer{ idx_buffer },
@@ -84,11 +88,21 @@ inline void Mesh<T>::Unbind()
 }
 
 template<typename T>
+inline void Mesh<T>::Delete()
+{
+	GLCall(glDeleteBuffers(1, &m_ibo_id));
+	GLCall(glDeleteBuffers(1, &m_vbo_id));
+	m_vao.Delete();
+}
+
+template<typename T>
 inline void Mesh<T>::Pack()
 { 
 	m_vao.Bind();
 	VertexBuffer vbo{ m_Verts.data(), sizeof(T) * static_cast<unsigned long long>(m_Verts.size())};
+	m_vbo_id = vbo.GetVertexBufferObjectID();
 	IndexBuffer ibo{ m_IdxBuffer };
+	m_ibo_id = ibo.GetIndexBufferObjectID();
 	m_vao.AddBuffer(vbo, m_vaol);
 
 	m_vao.Unbind();

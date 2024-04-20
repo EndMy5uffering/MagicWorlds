@@ -221,7 +221,7 @@ namespace Noise
 
             void SetFrequency(double frequency) { this->m_frequency = frequency; }
 
-            void SetOctaves(double octaves) { this->m_octaves = octaves; }
+            void SetOctaves(int octaves) { this->m_octaves = octaves; }
 	};
 
 }
