@@ -27,6 +27,6 @@ public:
 	void LookAt(const glm::vec3& dir, const glm::vec3& up);
 	glm::quat GetRotation();
 
-	glm::mat4 GetMatrix();
+	const glm::mat4 GetMatrix() const;
 };
 

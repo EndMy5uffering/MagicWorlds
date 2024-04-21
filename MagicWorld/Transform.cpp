@@ -45,7 +45,7 @@ glm::quat Transform::GetRotation()
 	return m_rotation;
 }
 
-glm::mat4 Transform::GetMatrix()
+const glm::mat4 Transform::GetMatrix() const
 {
 	return glm::mat4{ m_scale.x, 0, 0, m_position.x, 0, m_scale.y, 0, m_position.y, 0, 0, 1, m_position.z, 0, 0, 0, 1 } * glm::toMat4(m_rotation);
 }

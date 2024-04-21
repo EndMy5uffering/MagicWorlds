@@ -133,7 +133,9 @@ int main(void)
     uiShader.AddShaderSource("../Shader/UIShader/UIVert.glsl", GL_VERTEX_SHADER);
     uiShader.BuildShader();
 
-    UILib::UIManager manager{uiShader, g_renderer, cam};
+
+    InputSystem is{window};
+    UILib::UIManager manager{uiShader, g_renderer, cam, is};
     UILib::GUIElement el0{};
     el0.SetColor({0, 0, 0, 1});
     el0.GetTransform().SetPosition({-10, 0, 0});
