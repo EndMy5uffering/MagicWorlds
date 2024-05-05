@@ -46,8 +46,8 @@ class Texture
 {
 
 private:
-	int m_width{0};
-	int m_height{0};
+	unsigned int m_width{0};
+	unsigned int m_height{0};
 
 	unsigned int m_texture_id{0};
 	ColorData m_data{0};
@@ -62,6 +62,7 @@ private:
 	int m_last_bound_unit{0};
 
 	bool m_packed = false;
+	bool m_data_allocated = false;
 
 	int remaped_stbi_color_mode(CMode cmode)
 	{
@@ -76,27 +77,25 @@ private:
 		}
 	}
 	
-	unsigned int xy_idx(unsigned int x, unsigned int y) 
-	{
-		//Multiply with 3 or 4 to account for rgba(4 bytes) or rgb(3 bytes)
-		int stbi_col_mode = remaped_stbi_color_mode(m_cmode);
-		return (x * stbi_col_mode) + (y * m_width * stbi_col_mode);
-	}
+
 
 public:
 	
 	Texture();
-	Texture(ColorData data, CMode cmode, int width, int height);
+	Texture(ColorData data, CMode cmode, unsigned int width, unsigned int height);
 	~Texture();
 
 	void Pack();
 	void Bind();
 	void BindToSlot(int unit);
 	void Unbind();
+	void Delete();
 	void LoadFromFile(std::string path);
 
 	void SetPixel(unsigned int x, unsigned int y, const Color& c);
 	Color GetPixel(unsigned int x, unsigned int y);
+	Texture GetPixels(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1);
+	//Color GetPixelsUV(unsigned int u0, unsigned int v0, unsigned u1, unsigned v1);
 
 	void DrawLine(const glm::vec2& start, const glm::vec2& end, const Color& c);
 	void DrawLineH(const int x0, const int x1, const int y0, const Color& c);
@@ -114,6 +113,8 @@ public:
 	WrapST GetWrapS() { return this->m_wrap_s; }
 	WrapST GetWrapT() { return this->m_wrap_t; }
 
+	bool IsEmpty() { return m_texture_id != 0 && m_data_allocated && m_data != nullptr; }
+
 	void SetMinFilter(MinFilter minFilter);
 	void SetMagFilter(MagFilter magFilter);
 	void SetWrapS(WrapST wrap);
@@ -121,6 +122,17 @@ public:
 	void SetWrapST(WrapST wrap);
 
 	void SetColorMode(CMode cmode);
+	ColorData GetColorDataRef() { return m_data; }
+
+	Color operator[](const glm::vec2& px_pos);
+	
+	static glm::vec2 TranslateToUV(const glm::vec2& px_xy, unsigned int width, unsigned int height);
+	static glm::vec2 TranslateToXY(const glm::vec2& uv, unsigned int width, unsigned int height);
+
+	unsigned int TranslateXY(unsigned int x, unsigned int y);
+
+	// Generates an empty unusable image texture
+	static Texture Empty();
 
 };
 

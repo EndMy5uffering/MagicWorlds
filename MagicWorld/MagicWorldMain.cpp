@@ -118,6 +118,29 @@ int main(void)
     tex.Pack();
     tex.BindToSlot(0);
 
+    for (int y = 0; y < tex.GetHeight(); ++y) 
+    {
+        for (int x = 0; x < tex.GetWidth() * 4; ++x) 
+        {
+            std::cout << " " << (int)tex.GetColorDataRef()[x + y * tex.GetWidth()];
+        }
+        std::cout << "\n";
+    }
+    std::cout << "\n";
+
+    Texture cdata = tex.GetPixels(1,1,50,5);
+
+
+    for (int y = 0; y < cdata.GetHeight(); ++y)
+    {
+        for (int x = 0; x < cdata.GetWidth(); ++x)
+        {
+            Color c = cdata[{x, y}];
+            std::cout << " " << (int)c.r << " " << (int)c.g << " " << (int)c.b << " " << (int)c.a;
+        }
+        std::cout << "\n";
+    }
+
     Shader texShader{};
     texShader.AddShaderSource("../Shader/TextureShader/TextrueFrag.glsl", GL_FRAGMENT_SHADER);
     texShader.AddShaderSource("../Shader/TextureShader/TextrueVert.glsl", GL_VERTEX_SHADER);
@@ -173,7 +196,7 @@ int main(void)
             { 120, 0, 0, 255 },
             { 0, 255, 0, 255 },
             noise_clam);
-        vxbuffer_map.push_back({ {double(x) * 2.0, double(y) * 2.0, noise * mulHight, 1.0}, {c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, 1.0} });
+        vxbuffer_map.push_back({ {double(x) * 2.0, double(y) * 2.0, double(int(noise * mulHight) * 2) , 1.0}, {c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, 1.0}});
     }
 
     std::vector<unsigned int> idxbuff_map;

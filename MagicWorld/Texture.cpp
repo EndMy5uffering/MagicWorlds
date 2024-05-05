@@ -20,7 +20,7 @@ Texture::Texture() : m_packed{ false }
     GLCall(glGenTextures(1, &m_texture_id));
 }
 
-Texture::Texture(ColorData data, CMode cmode, int width, int height)
+Texture::Texture(ColorData data, CMode cmode, unsigned int width, unsigned int height)
     :
     m_width{width},
     m_height{height},
@@ -31,6 +31,7 @@ Texture::Texture(ColorData data, CMode cmode, int width, int height)
     if (data)
     {
         GLCall(glGenTextures(1, &m_texture_id));
+        m_data_allocated = true;
     }
     else
     {
@@ -44,7 +45,6 @@ Texture::Texture(ColorData data, CMode cmode, int width, int height)
 
 Texture::~Texture()
 {
-    GLCall(glDeleteTextures(1, &m_texture_id));
 }
 
 void Texture::Pack()
@@ -74,6 +74,11 @@ void Texture::Pack()
 
 void Texture::Bind()
 {
+    if (!m_data_allocated) 
+    {
+        std::cout << "Can not bind empty image!\n";
+        return;
+    }
     if (!m_packed) 
     {
         std::cout << "Pack texture at least once before binding!\n";
@@ -93,10 +98,21 @@ void Texture::Unbind()
     GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
+void Texture::Delete()
+{
+    GLCall(glDeleteTextures(1, &m_texture_id));
+    if(m_data_allocated) free(m_data);
+    m_data_allocated = false;
+    m_texture_id = 0;
+}
+
 void Texture::LoadFromFile(std::string path)
 {
+    if (m_data_allocated) return;
     int numColCh;
-    m_data = stbi_load(path.c_str(), &m_width, &m_height, &numColCh, remaped_stbi_color_mode(m_cmode));
+    
+    m_data = stbi_load(path.c_str(), (int*) & m_width, (int*) &m_height, &numColCh, remaped_stbi_color_mode(m_cmode));
+    m_data_allocated = true;
 
     if (!m_data)
     {
@@ -114,7 +130,7 @@ void Texture::SetPixel(unsigned int x, unsigned int y, const Color& c)
     if (!m_data) return; // Faulty data
     if (x < 0 || y < 0 || x > m_width || y > m_height) return; // Bound check
 
-    unsigned int idx = xy_idx(x, y);
+    unsigned int idx = TranslateXY(x, y);
     switch (m_cmode)
     {
     case RGB:
@@ -141,7 +157,7 @@ Color Texture::GetPixel(unsigned int x, unsigned int y)
     if (!m_data) return {0, 0, 0, 0}; // Faulty data
     if (x > m_width || y > m_height) return {0, 0, 0, 0}; // Bound check
 
-    unsigned int idx = xy_idx(x, y);
+    unsigned int idx = TranslateXY(x, y);
     switch (m_cmode)
     {
     case RGB:
@@ -156,6 +172,35 @@ Color Texture::GetPixel(unsigned int x, unsigned int y)
         std::cout << "Color mode not supported!\n";
         return { 0, 0, 0, 0 };
     }
+}
+
+Texture Texture::GetPixels(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1)
+{
+    Texture empty = Texture::Empty();
+    if (x0 < 0 || x0 > x1 || x1 > m_width || y0 < 0 || y0 > y1 || y1 > m_height) 
+    {
+        std::cout << "Sub image texture out of bounds (" << x0 << ", " << y0 << " to " << x1 << ", " << y0 << ") for range (0,0 to " << m_width << ", " << m_height << ")\n";
+        return empty;
+    }
+
+    unsigned int width = x1 - x0;
+    unsigned int height = y1 - y0;
+
+    int c_size = 3;
+    if (m_cmode == RGB) c_size = 3;
+    if (m_cmode == RGBA) c_size = 4;
+    ColorData data = (ColorData)malloc(c_size * sizeof(unsigned char) * width * height);
+
+    if (!data) return empty;
+
+    for (size_t i = 0; i < height; ++i) 
+    {
+        memcpy(data + (i * width * c_size), m_data + ((x0 * c_size + y0 * m_width)) + i * m_width, width * c_size);
+    }
+
+    Texture result{ data, m_cmode, width, height };
+    result.Pack();
+    return result;
 }
 
 void Texture::DrawLine(const glm::vec2& start, const glm::vec2& end, const Color& c)
@@ -336,4 +381,49 @@ void Texture::SetColorMode(CMode cmode)
     m_cmode = cmode;
 }
 
+Color Texture::operator[](const glm::vec2& px_pos)
+{
+    if (px_pos.x < 0 || px_pos.x > m_width || px_pos.y < 0 || px_pos.y > m_height) return Color{ 0, 0, 0, 0 };
 
+    size_t idx = TranslateXY(px_pos.x, px_pos.y);
+    switch (m_cmode)
+    {
+    case RGB:
+    {
+        return { m_data[idx], m_data[idx + 1], m_data[idx + 2], 255 };
+    }
+    case RGBA:
+    {
+        return { m_data[idx], m_data[idx + 1], m_data[idx + 2], m_data[idx + 3] };
+    }
+    default:
+        std::cout << "Color mode not supported!\n";
+        return { 0, 0, 0, 0 };
+    }
+}
+
+glm::vec2 Texture::TranslateToUV(const glm::vec2& px_xy, unsigned int width, unsigned int height)
+{
+    return glm::vec2(float(px_xy.x) / float(width), 1.0f - (float(px_xy.y) / float(height)));
+}
+
+glm::vec2 Texture::TranslateToXY(const glm::vec2& uv, unsigned int width, unsigned int height)
+{
+    return glm::vec2((unsigned int)(uv.x * width), (unsigned int)(height - (uv.y * height)));
+}
+
+unsigned int Texture::TranslateXY(unsigned int x, unsigned int y)
+{
+    //Multiply with 3 or 4 to account for rgba(4 bytes) or rgb(3 bytes)
+    int stbi_col_mode = remaped_stbi_color_mode(m_cmode);
+    return (x * stbi_col_mode) + (y * m_width * stbi_col_mode);
+}
+
+Texture Texture::Empty()
+{
+    Texture e{};
+    e.m_width = 0;
+    e.m_height = 0;
+    e.Delete();
+    return e;
+}
